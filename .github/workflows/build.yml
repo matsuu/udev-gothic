@@ -1,0 +1,37 @@
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install packages
+        run: sudo apt-get install -y ttfautohint pip
+
+      - name: Install python packages
+        run: sudo pip install fonttools==3.44.0 ttfautohint-py
+
+      - name: Install fontforge
+        run: |
+          sudo curl -sLo /usr/local/bin/fontforge https://github.com/fontforge/fontforge/releases/download/20201107/FontForge-2020-11-07-21ad4a1-x86_64.AppImage
+          sudo chmod +x /usr/local/bin/fontforge
+
+      - uses: actions/checkout@v3
+
+      - name: Build
+        run: ./make.sh
+
+      - name: Make directories for upload-artifact
+        run: |
+          mkdir UDEVGothic_${{ github.ref_name }}
+          mv build/UDEVGothic{,35{,JPDOC,LG},JPDOC,LG}-* UDEVGothic_${{ github.ref_name }}
+          mkdir UDEVGothic_NF_${{ github.ref_name }}
+          mv build/UDEVGothic{NF,35NF{,LG},NFLG}-* UDEVGothic_NF_${{ github.ref_name }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: UDEVGothic_${{ github.ref_name }}
+          path: UDEVGothic_${{ github.ref_name }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: UDEVGothic_NF_${{ github.ref_name }}
+          path: UDEVGothic_NF_${{ github.ref_name }}
